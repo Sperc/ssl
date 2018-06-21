@@ -9,6 +9,8 @@ public class Server {
         System.setProperty("javax.net.ssl.keyStore", "za.store");
         System.setProperty("javax.net.ssl.keyStorePassword", "password");
 
+        System.setProperty("javax.net.ssl.trustStore", "za1.store");
+
         ServerSocket serverSocket = ((SSLServerSocketFactory) SSLServerSocketFactory.getDefault()).createServerSocket(4444);
         System.out.println("Server ready...");
         while (true) {

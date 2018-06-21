@@ -15,7 +15,11 @@ import java.security.cert.X509Certificate;
 
 public class Client {
     public static void main(String... args) throws IOException {
+        System.setProperty("javax.net.ssl.keyStore", "za1.store");
+        System.setProperty("javax.net.ssl.keyStorePassword", "password");
+
         System.setProperty("javax.net.ssl.trustStore", "za.store");
+
         Socket socket = SSLSocketFactory.getDefault().createSocket("localhost", 4444);
         SSLSession session = ((SSLSocket) socket).getSession();
         Certificate[] cchain = session.getPeerCertificates();
