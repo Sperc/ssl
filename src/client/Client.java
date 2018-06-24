@@ -3,10 +3,7 @@ package client;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.security.KeyStore;
@@ -15,10 +12,12 @@ import java.security.cert.X509Certificate;
 
 public class Client {
     public static void main(String... args) throws IOException {
+        System.setProperty("javax.net.ssl.trustStore", "za.store");
+//        System.setProperty("javax.net.ssl.trustStore", "za1.store");
+        System.setProperty("javax.net.ssl.trustStorePassword", "password");
+
         System.setProperty("javax.net.ssl.keyStore", "za1.store");
         System.setProperty("javax.net.ssl.keyStorePassword", "password");
-
-        System.setProperty("javax.net.ssl.trustStore", "za.store");
 
         Socket socket = SSLSocketFactory.getDefault().createSocket("localhost", 4444);
         SSLSession session = ((SSLSocket) socket).getSession();
@@ -38,6 +37,15 @@ public class Client {
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         BufferedReader commandPrompt = new BufferedReader(new InputStreamReader(System.in));
         String message = null;
+
+        //wysylanie pliku na serwer
+//        File file = new File("za1.store");
+//        byte[] bytes = new byte[(int) file.length()];
+//        BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+//        bufferedInputStream.read(bytes, 0, bytes.length);
+//        OutputStream os = socket.getOutputStream();
+//        os.write(bytes);
+//        os.flush();
 
         while (true) {
             System.out.println("Wpisz wiadomosc");

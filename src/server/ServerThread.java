@@ -1,56 +1,66 @@
 package server;
 
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
+import com.sun.jndi.cosnaming.ExceptionMapper;
+
+import javax.net.ssl.*;
 import java.io.*;
-import java.math.BigInteger;
 import java.net.Socket;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
+import java.security.*;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class ServerThread extends Thread {
     private Socket socket;
 
-    public ServerThread(Socket socket) {
+    public ServerThread(Socket socket) throws Throwable {
         this.socket = socket;
-        printSocketInfo((SSLSocket) socket);
-        SSLSession session = ((SSLSocket) socket).getSession();
-        Certificate[] cchain = new Certificate[0];
-        try {
-            cchain = session.getPeerCertificates();
-        } catch (SSLPeerUnverifiedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("The Certificates used by peer");
-        for (int i = 0; i < cchain.length; i++) {
-            System.out.println(((X509Certificate) cchain[i]).getSubjectDN());
-        }
-        System.out.println("Peer host is " + session.getPeerHost());
-        System.out.println("Cipher is " + session.getCipherSuite());
-        System.out.println("Protocol is " + session.getProtocol());
-        System.out.println("ID is " + new BigInteger(session.getId()));
-        System.out.println("Session created in " + session.getCreationTime());
-        System.out.println("Session accessed in " + session.getLastAccessedTime());
-
     }
+
+    public void vertificateCert() throws Throwable {
+        KeyStore trustStore = KeyStore.getInstance("jks");
+        FileInputStream trustKeyStoreFile = new FileInputStream(new File("za1.store"));
+        trustStore.load(trustKeyStoreFile, "password".toCharArray());
+        java.security.cert.Certificate certificate = trustStore.getCertificate(trustStore.aliases().nextElement());
+
+        KeyStore identityStore = KeyStore.getInstance("jks");
+        FileInputStream identityKeyStoreFile = new FileInputStream(new File("za.store"));
+        identityStore.load(identityKeyStoreFile, "password".toCharArray());
+        Certificate identityCert = identityStore.getCertificate(identityStore.aliases().nextElement());
+
+
+        try {
+            certificate.verify(identityCert.getPublicKey());
+        } catch (Exception ex) {
+            this.finalize();
+        }
+        System.out.println(certificate.toString());
+    }
+
 
     @Override
     public void run() {
-
         try {
             PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+//            byte[] mybytearray = new byte[1024 * 100];
+//            InputStream is = socket.getInputStream();
+//            FileOutputStream fos = new FileOutputStream("client.store");
+//            BufferedOutputStream bos = new BufferedOutputStream(fos);
+//            int bytesRead = is.read(mybytearray, 0, mybytearray.length);
+//            bos.write(mybytearray, 0, bytesRead);
+
+            vertificateCert();
+
             while (true) {
                 printWriter.println(bufferedReader.readLine());
             }
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
+
 
     private void printSocketInfo(SSLSocket s) {
         System.out.println("Socket class: " + s.getClass());
